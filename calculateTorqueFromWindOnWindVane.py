@@ -26,7 +26,7 @@ Pw = .00256*(v**2) #psf (lbf/ft^2)
 #calculate the torque experienced by a  wind vane from wind 
 #blowing over it.
 # Derivation:
-#  F = A*Pw*Cd
+#  F = A*Pw*Cd ##from:http://www.wikihow.com/Calculate-Wind-Load
 #Since this acts over the length of the plate:
 #  torque = Pw * Cd *  * h * integral of l from 0 to L.
 #This reduces to:
