@@ -1,8 +1,8 @@
 #Parameters to change for simulation
 #This assumes a rectangular, thin-plate is used as the wind vane
 v = 1.5 #velocity of the wind in mph
-h = 1 #height of the windvane in inches
-L = 3 #length of the windvane in inches from the center pivot point
+h = 2 #height of the windvane in inches
+L = 6 #length of the windvane in inches from the center pivot point
 
 
 #Parameters that shouldn't be changed under normal use: 
