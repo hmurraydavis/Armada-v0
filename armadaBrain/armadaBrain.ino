@@ -1,3 +1,7 @@
+/* 
+Writen by Halie Murray-Davis, hmurraydavis@gmail.com.
+*/
+
 #include <nmea.h>
 #include <SoftwareSerial.h>
 #include <Servo.h>
@@ -7,6 +11,12 @@
 #define KRUDDER 3
 #define STEPSAT90 90 //The number of steps the stepper has traveled when the sail gets to 90 degrees
 
+//DIGITAL PINS FOR RC OVERRIDE CONTROL
+#define RC_TOGGLE 11
+#define RUDDER_RC 12
+#define SAIL_RC 13
+#define RUDDER_PIN 3
+
 //Physical parameters:
 #define LBOOM .3 //length of the boom in cm
 
@@ -15,26 +25,50 @@ NMEA gps(GPRMC);
 
 //Initialize software objects:
 SoftwareSerial gpsSerial(10, 11); //RX, TX
+
 Servo rudder;
+
 const int stepsPerRevolution = 200;
 Stepper sail(stepsPerRevolution, 4,5,6,7); //Connect stepper on pins 4,5,6,& 7
+
 
 int currentSailPosition = 0;
 
 
 
 void setup() {
+  // Start serial coms for debuging via the serial monitor and reading back GPS data:
   Serial.begin(9600);
   gpsSerial.begin(9600);
+
+  // Set the pins for RC control of sail and rudder as inputs
+  pinMode(RUDDER_RC, INPUT);
+  pinMode(SAIL_RC, INPUT);
+
+  // Initialize the rudder servo objects:
+  rudder.attach(RUDDER_PIN);
+}
+
+
+void takeRCControl(){
+  int rudderSetPoint = pulseIn(RUDDER_RC, HIGH, 25000); 
+  setRudderPosition(rudderSetPoint) ;
+  int sailSetPoint = pulseIn(SAIL_RC, HIGH, 25000);
+  setSailPosition(sailSetPoint);
 }
 
 
 int windDirection(){
-  return analogRead(A0)/72;
+  return int(analogRead(A0)/72);
+}
+
+
+void setRudderPosition(int desiredRudderAngle){
+  rudder.write(desiredRudderAngle);
 }
 
 void setSailPosition(int stepsToMoveSail){
-  int cat = 8;
+  sail.step(stepsToMoveSail);
 }
 
 
