@@ -28,10 +28,10 @@ SoftwareSerial gpsSerial(10, 11); //RX, TX
 
 Servo rudder;
 
-const int stepsPerRevolution = 200;
+const int stepsPerRevolution = 48;
 Stepper sail(stepsPerRevolution, 4,5,6,7); //Connect stepper on pins 4,5,6,& 7
 
-
+//Create variable to keep track of sail stepper's position:
 int currentSailPosition = 0;
 
 
@@ -47,6 +47,7 @@ void setup() {
 
   // Initialize the rudder servo objects:
   rudder.attach(RUDDER_PIN);
+  sail.setSpeed(60);
 }
 
 
@@ -132,6 +133,8 @@ int rudderSetPoint(float desLatitude, float desLongitude){
 }
 
 void loop() {
+
+  /*
   if (gpsSerial.available() > 0 ) {
     //Serial.println("trying to read!");
     char c = gpsSerial.read();
@@ -149,8 +152,11 @@ void loop() {
         // check if you are in Colorado, USA
 
     }
+    
 
   }
-  }
+  } */
+  setSailPosition(40);
+  delay(100);
 
 }
