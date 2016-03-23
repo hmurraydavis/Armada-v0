@@ -2,10 +2,12 @@
 Writen by Halie Murray-Davis, hmurraydavis@gmail.com.
 */
 
-#include <nmea.h>
+//#include <nmea.h>
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include <Stepper.h>
+#include "TinyGPS.h"
+TinyGPS gps;
 
 //Tuning constants:
 #define KRUDDER 3
@@ -16,15 +18,25 @@ Writen by Halie Murray-Davis, hmurraydavis@gmail.com.
 #define RUDDER_RC 12
 #define SAIL_RC 13
 #define RUDDER_PIN 3
+#define GPS_RX 10
+#define GPS_TX 11
 
 //Physical parameters:
 #define LBOOM .3 //length of the boom in cm
 
+
+
+// Define globals for first pass at GPS working:
+long lat, lon;
+unsigned long fix_age, time, date, speed, course;
+unsigned long chars;
+unsigned short sentences, failed_checksum;
+
 // create a GPS data connection to GPRMC sentence type
-NMEA gps(GPRMC);
+//NMEA gps(GPRMC);
 
 //Initialize software objects:
-SoftwareSerial gpsSerial(10, 11); //RX, TX
+SoftwareSerial gpsSerial(10, 11); //RX, TX //TODO: replace with defined variables. 
 
 Servo rudder;
 
@@ -118,7 +130,8 @@ int rudderSetPoint(float desLatitude, float desLongitude){
     int rudderSetPoint: servo position (in degrees) that the rudder should be set at to reach the waypoint
   */
   int rudderSetPoint = 0;
-  float headingToPoint = gps.gprmc_course_to(desLatitude, desLongitude) - gps.gprmc_course();
+  //TODO: replace with actual heading: 
+  float headingToPoint = 2.0; //gps.gprmc_course_to(desLatitude, desLongitude) - gps.gprmc_course();
 
   //Bandpass filter to prevent excessive rudder action: 
   if (headingToPoint < 5){
@@ -133,7 +146,38 @@ int rudderSetPoint(float desLatitude, float desLongitude){
 }
 
 void loop() {
+  Serial.println("Hi!!");
+  if (gpsSerial.available() > 0 ) {
+    //Serial.println("trying to read!");
+    char c = gpsSerial.read();
+    //Serial.print("c is: "); 
+    Serial.println(c);
+    
 
+      // Process GPS data!
+    if (gps.encode(c)) {
+      
+      // retrieves +/- lat/long in 100000ths of a degree
+      gps.get_position(&lat, &lon, &fix_age);
+       
+      // time in hhmmsscc, date in ddmmyy
+      gps.get_datetime(&date, &time, &fix_age);
+       
+      // returns speed in 100ths of a knot
+      speed = gps.speed();
+       
+      // course in 100ths of a degree
+      course = gps.course();
+      
+      Serial.println(date);
+
+    }
+    
+
+  }
+   
+  
+  //Old library version: 
   /*
   if (gpsSerial.available() > 0 ) {
     //Serial.println("trying to read!");
