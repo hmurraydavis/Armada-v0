@@ -21,6 +21,8 @@ TinyGPS gps;
 #define GPS_RX 10
 #define GPS_TX 11
 
+#define MESSAGE_CHAR_ARRAY_LENGTH 100
+
 //Physical parameters:
 #define LBOOM .3 //length of the boom in cm
 
@@ -31,6 +33,10 @@ long lat, lon;
 unsigned long fix_age, time, date, speed, course;
 unsigned long chars;
 unsigned short sentences, failed_checksum;
+
+char gpsMessage[100];
+boolean inGPSFlag = 0;
+int lenGPSMessage = 0;
 
 // create a GPS data connection to GPRMC sentence type
 //NMEA gps(GPRMC);
@@ -60,6 +66,8 @@ void setup() {
   // Initialize the rudder servo objects:
   rudder.attach(RUDDER_PIN);
   sail.setSpeed(60);
+  
+  
 }
 
 
@@ -146,16 +154,44 @@ int rudderSetPoint(float desLatitude, float desLongitude){
 }
 
 void loop() {
-  Serial.println("Hi!!");
+  //Serial.println("Hi!!");
   if (gpsSerial.available() > 0 ) {
     //Serial.println("trying to read!");
     char c = gpsSerial.read();
+    Serial.println("C is: "+String(c) );
+    
+    if(c=='$'){
+      //Toggle in GPS flag to describe if we currently are reading a message:
+      if(inGPSFlag == 0){
+        inGPSFlag = 1;
+      }
+      if(inGPSFlag == 1){
+        inGPSFlag = 0;
+        
+        Serial.print("GPS Message saved is: ");
+        Serial.println(gpsMessage);
+        
+        for(int i; i<=MESSAGE_CHAR_ARRAY_LENGTH; i++){
+          gpsMessage[i] = '@';
+        }
+      }
+    }
+    
+    if(inGPSFlag == 0){
+      lenGPSMessage++;
+      gpsMessage[lenGPSMessage] = c; 
+    }
+    
     //Serial.print("c is: "); 
-    Serial.println(c);
+    //Serial.print("C is: ");
+    //Serial.println(c);
+    //Serial.print("Encoded: ");
+    //Serial.println(gps.encode(c));
     
 
       // Process GPS data!
-    if (gps.encode(c)) {
+    /*if (gps.encode(c)) {
+      
       
       // retrieves +/- lat/long in 100000ths of a degree
       gps.get_position(&lat, &lon, &fix_age);
@@ -171,7 +207,7 @@ void loop() {
       
       Serial.println(date);
 
-    }
+    }*/
     
 
   }
