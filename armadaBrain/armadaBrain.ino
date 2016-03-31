@@ -34,7 +34,7 @@ unsigned long fix_age, time, date, speed, course;
 unsigned long chars;
 unsigned short sentences, failed_checksum;
 
-char gpsMessage[100];
+
 boolean inGPSFlag = 0;
 int lenGPSMessage = 0;
 
@@ -42,7 +42,7 @@ int lenGPSMessage = 0;
 //NMEA gps(GPRMC);
 
 //Initialize software objects:
-SoftwareSerial gpsSerial(10, 11); //RX, TX //TODO: replace with defined variables. 
+SoftwareSerial gpsSerial(GPS_RX, GPS_TX); //RX, TX //TODO: replace with defined variables. 
 
 Servo rudder;
 
@@ -56,7 +56,7 @@ int currentSailPosition = 0;
 
 void setup() {
   // Start serial coms for debuging via the serial monitor and reading back GPS data:
-  Serial.begin(9600);
+  Serial.begin(1200);
   gpsSerial.begin(9600);
 
   // Set the pins for RC control of sail and rudder as inputs
@@ -154,89 +154,47 @@ int rudderSetPoint(float desLatitude, float desLongitude){
 }
 
 void loop() {
-  //Serial.println("Hi!!");
-  if (gpsSerial.available() > 0 ) {
+  //char gpsMessage[70];
+  //int arrayIndex = 0;
+  while (gpsSerial.available() ) {
+      
     //Serial.println("trying to read!");
     char c = gpsSerial.read();
-    Serial.println("C is: "+String(c) );
+    //Serial.println("C is: "+String(c) );
+    //gpsMessage[arrayIndex] = c;
     
-    if(c=='$'){
-      //Toggle in GPS flag to describe if we currently are reading a message:
-      if(inGPSFlag == 0){
-        inGPSFlag = 1;
-      }
-      if(inGPSFlag == 1){
-        inGPSFlag = 0;
-        
-        Serial.print("GPS Message saved is: ");
-        Serial.println(gpsMessage);
-        
-        for(int i; i<=MESSAGE_CHAR_ARRAY_LENGTH; i++){
-          gpsMessage[i] = '@';
-        }
-      }
-    }
-    
-    if(inGPSFlag == 0){
-      lenGPSMessage++;
-      gpsMessage[lenGPSMessage] = c; 
-    }
-    
-    //Serial.print("c is: "); 
-    //Serial.print("C is: ");
-    //Serial.println(c);
-    //Serial.print("Encoded: ");
-    //Serial.println(gps.encode(c));
-    
-
-      // Process GPS data!
-    /*if (gps.encode(c)) {
-      
-      
-      // retrieves +/- lat/long in 100000ths of a degree
+    if (gps.encode(c)) {
+      Serial.println("ENCODED GPS MESSAGE!!!!!! WAHOOOOO!!!");
       gps.get_position(&lat, &lon, &fix_age);
-       
-      // time in hhmmsscc, date in ddmmyy
-      gps.get_datetime(&date, &time, &fix_age);
-       
-      // returns speed in 100ths of a knot
-      speed = gps.speed();
-       
-      // course in 100ths of a degree
-      course = gps.course();
+      Serial.println("Lat, Lon: ");
+      Serial.print(lat);
+      Serial.print(",");
+      Serial.println(lon);
       
-      Serial.println(date);
-
-    }*/
+      speed = gps.speed();
+      Serial.print("Speed: ");
+      Serial.println(speed);
+      
+      course = gps.course();
+      Serial.print("Course: ");
+      Serial.println(course);
+      Serial.println("\n");
+    }
+    /*if (c=='.'){
+      Serial.println("Period printed!");
+    }
+    if (c=='*'){
+      Serial.println("*****Astrisk printed******");
+      gpsMessage[arrayIndex+1] = gpsSerial.read();
+      gpsMessage[arrayIndex+2] = gpsSerial.read();
+      Serial.println(gpsMessage);
+      break;
+    }
+    arrayIndex++;*/
     
-
   }
    
-  
-  //Old library version: 
-  /*
-  if (gpsSerial.available() > 0 ) {
-    //Serial.println("trying to read!");
-    char c = gpsSerial.read();
-    //Serial.print("c is: "); 
-    Serial.println(c);
-    
-
-      // check if the character completes a valid GPS sentence
-    if (gps.decode(c)) {
-      // check if GPS positioning was active
-      Serial.print("Status is: "); Serial.println(gps.gprmc_status() );
-      if (gps.gprmc_status() == 'A') {
-        Serial.println("In A loop!");
-      Serial.println(gps.gprmc_latitude() );
-        // check if you are in Colorado, USA
-
-    }
-    
-
-  }
-  } */
-  setSailPosition(40);
-  delay(100);
+  //setSailPosition(40);
+  //delay(100);
 
 }
