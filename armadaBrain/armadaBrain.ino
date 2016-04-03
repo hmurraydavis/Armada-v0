@@ -56,7 +56,7 @@ int currentSailPosition = 0;
 
 void setup() {
   // Start serial coms for debuging via the serial monitor and reading back GPS data:
-  Serial.begin(1200);
+  Serial.begin(115200);
   gpsSerial.begin(9600);
 
   // Set the pins for RC control of sail and rudder as inputs
@@ -154,47 +154,34 @@ int rudderSetPoint(float desLatitude, float desLongitude){
 }
 
 void loop() {
-  //char gpsMessage[70];
-  //int arrayIndex = 0;
   while (gpsSerial.available() ) {
-      
-    //Serial.println("trying to read!");
     char c = gpsSerial.read();
-    //Serial.println("C is: "+String(c) );
-    //gpsMessage[arrayIndex] = c;
     
     if (gps.encode(c)) {
-      Serial.println("ENCODED GPS MESSAGE!!!!!! WAHOOOOO!!!");
       gps.get_position(&lat, &lon, &fix_age);
-      Serial.println("Lat, Lon: ");
-      Serial.print(lat);
+      
+      /*Serial.print(lat);
       Serial.print(",");
-      Serial.println(lon);
+      Serial.println(lon);*/
       
-      speed = gps.speed();
+      Serial.print(lat/1000000.0, 8);
+      Serial.print(",");
+      Serial.println(lon/1000000.0, 8);
+      
+      //Serial.println();
+      
+      /*speed = gps.speed();
       Serial.print("Speed: ");
-      Serial.println(speed);
+      Serial.println(speed);*/
       
-      course = gps.course();
+      /*course = gps.course();
       Serial.print("Course: ");
-      Serial.println(course);
-      Serial.println("\n");
+      Serial.println(course/100.0);*/
+      
+      
+/*      float fmph = gps.f_speed_mph(); // speed in miles/hr*/
+/*      Serial.print("FP Speed (mph): ");*/
+/*      Serial.println(fmph);*/
     }
-    /*if (c=='.'){
-      Serial.println("Period printed!");
-    }
-    if (c=='*'){
-      Serial.println("*****Astrisk printed******");
-      gpsMessage[arrayIndex+1] = gpsSerial.read();
-      gpsMessage[arrayIndex+2] = gpsSerial.read();
-      Serial.println(gpsMessage);
-      break;
-    }
-    arrayIndex++;*/
-    
   }
-   
-  //setSailPosition(40);
-  //delay(100);
-
 }
