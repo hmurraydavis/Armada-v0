@@ -7,7 +7,12 @@ Writen by Halie Murray-Davis, hmurraydavis@gmail.com.
 #include <Servo.h>
 #include <Stepper.h>
 #include "TinyGPS.h"
+#include <Wire.h>
+#include <LSM303.h>
+
+
 TinyGPS gps;
+LSM303 compass;
 
 //Tuning constants:
 #define KRUDDER 3
@@ -33,6 +38,7 @@ long lat, lon;
 unsigned long fix_age, time, date, speed, course;
 unsigned long chars;
 unsigned short sentences, failed_checksum;
+char compassReport[80];
 
 
 boolean inGPSFlag = 0;
@@ -67,6 +73,10 @@ void setup() {
   rudder.attach(RUDDER_PIN);
   sail.setSpeed(60);
   
+  // Initialize the compass object:
+  Wire.begin();
+  compass.init();
+  compass.enableDefault();
   
 }
 
@@ -182,6 +192,23 @@ void loop() {
 /*      float fmph = gps.f_speed_mph(); // speed in miles/hr*/
 /*      Serial.print("FP Speed (mph): ");*/
 /*      Serial.println(fmph);*/
+      
+      // Read from compass and report results: 
+      compass.read();
+      
+      // TODO: Potentially switch this to using pointers or globals for persistance
+      int cmpsX = compass.m.x;
+      int cmpsY = compass.m.y;
+      int cmpsZ = compass.m.z;
+      
+      Serial.print("Compass headings: ");
+      Serial.print("X: ");
+      Serial.print(cmpsX);
+      Serial.print(", Y: ");
+      Serial.print(cmpsY);
+      Serial.print(", Z: ");
+      Serial.print(cmpsZ);
+      Serial.println(".");
     }
   }
 }
